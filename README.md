@@ -25,11 +25,14 @@ controller Action 注释作用
  * @verify {"field":"title","description":"标题","rules":[{"rule":"required"}]} //字段校验
  * @verify {"field":"redirect_url","rules":[{"rule":"required"},{"rule":"url"}],"description":"回跳地址"} //字段校验
  */	
-数据校验
+- 数据校验
+
 单字段,单校验规则 @verify {"field":"code","description":"短信验证码","rule":"required"}
+
 单字段,多校验规则 @verify {"field":"code","description":"短信验证码","rules":[{"rule":"required"},{"rule":"url"}]}
 
 多字段,单校验规则 @verify {"fields":[{"filed":"nmae"},{"filed":"moble"}],"description":"短信验证码","rule":"required"}
+
 多字段,多校验规则 @verify {"fields":[{"filed":"nmae"},{"filed":"moble"}],"description":"短信验证码",rules":[{"rule":"required"},{"rule":"url"}]}
 
 # API签名
@@ -50,7 +53,7 @@ API场景的Action请继承Apicommon
 
 - 获取MySQL实体表
 
-在bin 运行 php at.php mysql <实体/工厂>  <MySQLDB>
+在bin 运行 php at.php mysql <实体/工厂>  <数据库名>
 
 **注意:先运行实体再运行工厂**
 
