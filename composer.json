@@ -1,0 +1,11 @@
+{
+    "require": {
+        "symfony/console": "@stable",
+        "hassankhan/config": "*"
+    },
+    "autoload": {
+        "psr-4":{
+            "Mycmd\\": "src/Mycmd"
+        }
+    }
+}
