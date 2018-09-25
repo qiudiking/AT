@@ -25,7 +25,8 @@
 		    'log_file'=> '/var/log/swoole.log',
 		    'user'=>'root',
 		    'group'=>'root',
-		    'process_name'=>'AT_TCP'
+		    'process_name'=>'AT_TCP',
+		    'daemonize'=>1,
 	    ],
 	    'HTTP'=>[
 			'worker_num'=>4,

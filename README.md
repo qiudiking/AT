@@ -6,6 +6,24 @@ AT微型php框架,主要基于swoole和yaf开发的一个轻量级框架,简单�
 - php>=7
 - php扩展: swoole>=4.0.4 yaf>=3.0.6 yac>=2.0.2 seaslog>=1.7.6
 
+# 服务
+- 服务HTTP
+
+php bin/at.php start HTTP 启动服务
+
+php bin/at.php restart HTTP 重启服务
+
+php bin/at.php stop HTTP 停止服务
+
+- TCP服务
+
+php bin/at.php start TCP 启动服务
+
+php bin/at.php restart TCP 重启服务
+
+php bin/at.php stop TCP 停止服务
+
+
 # 路由
 路由使用
 - 默认路由 Index/Index/Index

@@ -219,7 +219,7 @@ class SwooleServer {
 	 */
 	public function stop(SymfonyStyle $oi)
 	{
-		Log::log($this->serverName.'服务关闭');
+		//Log::log($this->serverName.'服务关闭');
 		$config = $this->config['ports'][$this->serverName];
 		$processInfo = $this->get_process_info();
 		if ( $processInfo ) {
@@ -260,6 +260,7 @@ class SwooleServer {
 		Log::setPath($logPath);
 		$this->server = new  \swoole_server($config['socket_host'],$config['socket_port'],SWOOLE_PROCESS,$config['socket_type']);
 		self::$serverInstance = $this->server;
+		$oi->success($this->serverName.'服务启动成功;端口:'.$config['socket_port']);
 		Log::log($this->serverName.'服务启动');
 		$this->server->set($set);
 		$this->server->on('connect',array($this,'onConnect'));
