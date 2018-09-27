@@ -12,6 +12,8 @@ namespace server\server;
 
 
 use Noodlehaus\Config;
+use server\Client\ClientParams;
+use server\Client\Pack;
 use server\Log\Log;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Yaf\Exception;
@@ -51,7 +53,7 @@ class SwooleServer {
 	/**
 	 *php代码执行过程中发生错误
 	 */
-	public static function handleFatal(){
+	public  function handleFatal(){
 		$error = handleFatal();
 		Log::error($error);
 	}
@@ -77,7 +79,8 @@ class SwooleServer {
 	 *
 	 * @return string
 	 */
-	public function set_process_name($postfix = ''){
+	public function set_process_name($postfix = '')
+	{
 		$process_name = isset($this->config['server'][$this->serverName]['process_name'])?$this->config['server'][$this->serverName]['process_name']:$this->serverName;
 		$port = '[port:'.$this->config['ports'][$this->serverName]['socket_port'].']';
 		return  $process_name.$postfix.$port;
@@ -110,8 +113,10 @@ class SwooleServer {
 
 
 
-	public function onConnect( $server,  $fd,  $reactorId){
+	public function onConnect( $server,  $fd,  $reactorId)
+	{
 		echo "链接成功\n";
+		Log::log('链接成功');
 	}
 
 	public function onReceive(\swoole_server $server,  $fd,  $reactor_id,  $data){
@@ -119,7 +124,6 @@ class SwooleServer {
 		list( $class, $method ) = explode( '::', $data->method );
 		$result = ClientParams::instance();
 		try{
-			$class = '\application\Tcp'. $class;
 			if($class && $method ){
 				if(class_exists($class)){
 				    $instance = new $class;
@@ -141,26 +145,33 @@ class SwooleServer {
 		$result->request_id = $data->request_id;
 		$result->isResponse = $data->isResponse;
 		$sendData = Pack::sendEncode(Pack::encode(serialize($result)));
+		$str = $sendData.PHP_EOL .'====================================='.PHP_EOL;
+		file_put_contents(AT.'/bin/b.txt',$str,FILE_APPEND);
 		$server->send($fd,$sendData);
 	}
 
-	public function onClose( $server,  $fd,  $reactorId){
+	public function onClose( $server,  $fd,  $reactorId)
+	{
 
 	}
 
-	public function onPacket( $server,  $data, array $client_info){
+	public function onPacket( $server,  $data, array $client_info)
+	{
 
 	}
 
-	public function onBufferFull( $server,  $fd){
+	public function onBufferFull( $server,  $fd)
+	{
 
 	}
 
-	public function onBufferEmpty($server,  $fd){
+	public function onBufferEmpty($server,  $fd)
+	{
 
 	}
 
-	public function onStart($server){
+	public function onStart($server)
+	{
 		$process_name = $this->set_process_name('Main');
 		cli_set_process_title($process_name);
 	}
@@ -168,7 +179,8 @@ class SwooleServer {
 
 	}
 
-	public function onWorkerStart($server,$worker_id){
+	public function onWorkerStart($server,$worker_id)
+	{
 		Log::log($this->serverName.'服务启动成功....');
 		if(!$server->taskworker){
 			$process_name = $this->set_process_name('Worker');
@@ -178,23 +190,28 @@ class SwooleServer {
 		cli_set_process_title($process_name);
 	}
 
-	public function onWorkerStop($server,  $worker_id){
+	public function onWorkerStop($server,  $worker_id)
+	{
 		print_r('关闭');
 	}
 
-	public function onWorkerExit( $server,  $worker_id){
+	public function onWorkerExit( $server,  $worker_id)
+	{
 
 	}
 
-	public function onWorkerError( $server,  $worker_id,  $worker_pid,  $exit_code,  $signal){
+	public function onWorkerError( $server,  $worker_id,  $worker_pid,  $exit_code,  $signal)
+	{
 
 	}
 
-	public function onTask( $server,  $task_id,  $src_worker_id,  $data){
+	public function onTask( $server,  $task_id,  $src_worker_id,  $data)
+	{
 
 	}
 
-	public function onFinish( $server,  $task_id,  $data){
+	public function onFinish( $server,  $task_id,  $data)
+	{
 
 	}
 
@@ -207,7 +224,8 @@ class SwooleServer {
 
 	}
 
-	public function onPipeMessage( $server,  $src_worker_id,  $message){
+	public function onPipeMessage( $server,  $src_worker_id,  $message)
+	{
 
 	}
 
@@ -219,7 +237,6 @@ class SwooleServer {
 	 */
 	public function stop(SymfonyStyle $oi)
 	{
-		//Log::log($this->serverName.'服务关闭');
 		$config = $this->config['ports'][$this->serverName];
 		$processInfo = $this->get_process_info();
 		if ( $processInfo ) {
@@ -227,7 +244,7 @@ class SwooleServer {
 			$pid  = $processInfo['pid'];
 			if ( $pid ) {
 				\swoole_process::kill( $pid );
-				file_put_contents( AT.'/bin/pidfile/'.$this->serverName.$config['socket_port'].'.pid', '' );
+				file_put_contents( AT.'/bin/pidfile/'.$this->serverName.$config['socket_port'].'.pid', $pid );
 				$oi->success($this->serverName.'服务关闭成功 端口:'.$config['socket_port']);
 			} else {
 				$oi->error($this->serverName.'服务关闭失败 端口:'.$config['socket_port']);

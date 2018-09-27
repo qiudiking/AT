@@ -13,7 +13,7 @@ namespace server\Exception;
  *
  * @package Exception
  */
-class SOAClientException extends \Exception{
+class ClientException extends \Exception{
 	public function __construct( $message, $code  ) {
 		parent::__construct( $message, $code );
 	}

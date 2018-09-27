@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <?php $version = '1.1'?>
+    <meta charset="UTF-8">
+    <title>测试</title>
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/webapp.js?v=<?=$version?>"></script>
+    <script src="/static/js/page.js?v=<?=$version?>"></script>
+    <script src="/static/js/sha1.js?v=<?=$version?>"></script>
+    <script src="/static/js/base64.js?v=<?=$version?>"></script>
+    <script src="/static/js/jbase64.js?v=<?=$version?>"></script>
+</head>
+<body>
+    <h1>hello--------</h1>
+</body>
+<script>
+    var api_url = 'http://at.blogci.cn';
+    var timer = window.setInterval(function () {
+        page.apiGet('/Index/Index/index',{},function ( res ) {
+            console.log(res);
+            if(!res.code === 0){
+                window.clearTimeout(timer);
+                alert('出现问题了');
+            }
+        });
+    },200);
+
+
+</script>
+</html>

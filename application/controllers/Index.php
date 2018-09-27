@@ -7,8 +7,18 @@
  */
 class IndexController extends CommonController
 {
+	/**
+	 * @throws \server\Exception\ClientException
+	 */
 	public function indexAction()
 	{
-		$this->display('index');
+		$result = \server\Client\Result::Instance();
+		$result->setCode( $this->invokeCoroutine('\App\Demo::hello'));
+		echo $result;
+	}
+
+	public function demoAction()
+	{
+		$this->display('demo');
 	}
 }

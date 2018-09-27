@@ -8,8 +8,7 @@
 class ErrorController extends Yaf\Controller_Abstract {
 
 	//从2.1开始, errorAction支持直接通过参数获取异常
-	public function errorAction($exception) {
-		$this->getView()->assign("exception", $exception);
-		$this->display('error/error');
+	public function errorAction() {
+		$this->display('error');
 	}
 }

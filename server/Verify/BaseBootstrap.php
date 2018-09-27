@@ -8,7 +8,6 @@
 
 namespace server\Verify;
 
-use Log\Log;
 use server\DocParse\DocParser;
 use server\Exception\ErrorHandler;
 use server\Exception\VerifyException;

@@ -20,7 +20,7 @@
 		    'package_body_offset'=>4,
 		    'package_length_offset'=>0,
 		    'max_request'=>300000,
-		    'worker_num'=>4,
+		    'worker_num'=>8,
 		    'task_worker_num'=>2,
 		    'log_file'=> '/var/log/swoole.log',
 		    'user'=>'root',

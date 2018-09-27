@@ -19,7 +19,7 @@ class HttpServer extends SwooleServer {
 	/**
 	 *php代码执行过程中发生错误
 	 */
-	public static function handleFatal(){
+	public  function handleFatal(){
 		$error = handleFatal();
 		if(self::$response){
 			Log::error($error);
