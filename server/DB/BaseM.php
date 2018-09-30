@@ -3,10 +3,9 @@
 namespace server\DB;
 
 use server\Exception\ErrorHandler;
-use server\server\Exception\DBException;
 use server\Exception\FieldVerifyException;
 use server\Exception\ThrowException;
-use Log\Log;
+use server\Log\Log;
 use Yaf\Exception;
 
 
@@ -1014,7 +1013,7 @@ class BaseM extends IModelInterface {
 		} catch ( FieldVerifyException $exception ) {
 			FieldVerifyException::throwException( $exception->getMessage() );
 		} catch ( \Exception $e ) {
-			throw new DBException( ErrorHandler::DB_SAVE_FAIL, $e->getMessage() );
+			throw new \server\Exception\DBException( ErrorHandler::DB_SAVE_FAIL, $e->getMessage() );
 		}
 
 	}
@@ -1445,7 +1444,7 @@ class BaseM extends IModelInterface {
 	}
 
 	/**
-	 * 更新表
+	 *  更新表
 	 *
 	 *  <pre>
 	 *
@@ -1457,9 +1456,11 @@ class BaseM extends IModelInterface {
 	 *
 	 * @param      $data
 	 * @param bool $isWhere true 必须限制条件 false 限制条件可有可无 注意 会修改全表
+	 * @param      $data
+	 * @param bool $isWhere
 	 *
 	 * @return bool|int
-	 * @throws DBException
+	 * @throws \server\Exception\DBException
 	 */
 	public function update( $data, $isWhere = true ) {
 		if ( $isWhere && ! $this->PDO->getWhere() ) {

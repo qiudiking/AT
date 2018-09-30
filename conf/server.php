@@ -30,7 +30,7 @@
 	    ],
 	    'HTTP'=>[
 			'worker_num'=>4,
-		    'task_worker_num'=>2,
+		    'task_worker_num'=>4,
 		    'max_request'=>30000,
 		    'daemonize'=>1,
 		    'log_file'=>'/var/log/swoole.log',

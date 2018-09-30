@@ -50,7 +50,7 @@ class myRoute implements \Yaf\Route_Interface {
 			}
 		}
 
-		Log::log( '=========== 路由' . $requestUri );
+		//Log::log( '=========== 路由' . $requestUri );
 		$firstStr = substr( $requestUri, 0, 1 );
 		if ( $firstStr === '' ) {
 			$uri = '/';

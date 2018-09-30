@@ -219,6 +219,7 @@ webapp.get = function ( url , param , successFunc , errorFunc , method , async ,
     
     $.ajax( {
         type     : method , data: param , url: url , dataType: 'json' , async: async , success: function ( response ) {
+            console.log(response);
             webapp.closeLoading();
             if ( typeof successFunc === 'function' ) {
                 successFunc( response );
@@ -226,7 +227,6 @@ webapp.get = function ( url , param , successFunc , errorFunc , method , async ,
                 throw new Error( 'successFunc not a function' );
             }
         } , error: function ( e ) {
-            
             webapp.error( '网络错误啦！！' );
             webapp.closeLoading();
             if ( typeof errorFunc === 'function' ) {

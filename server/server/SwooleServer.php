@@ -55,7 +55,13 @@ class SwooleServer {
 	 */
 	public  function handleFatal(){
 		$error = handleFatal();
-		Log::error($error);
+		if(isset($_SERVER['FD'])){
+			Log::error($error);
+			$result = ClientParams::instance();
+			$result->setExceptionMessage($this->serverName.'server error',500);
+			$sendData = Pack::sendEncode(Pack::encode(serialize($result)));
+			$this->server->send(getArrVal('FD',$_SERVER),$sendData);
+		}
 	}
 
 
@@ -116,10 +122,11 @@ class SwooleServer {
 	public function onConnect( $server,  $fd,  $reactorId)
 	{
 		echo "链接成功\n";
-		Log::log('链接成功');
+		//Log::log('链接成功');
 	}
 
 	public function onReceive(\swoole_server $server,  $fd,  $reactor_id,  $data){
+		$_SERVER['FD'] = $fd;
 		$data = unserialize(Pack::decode(Pack::decodeData($data)));
 		list( $class, $method ) = explode( '::', $data->method );
 		$result = ClientParams::instance();
@@ -145,8 +152,6 @@ class SwooleServer {
 		$result->request_id = $data->request_id;
 		$result->isResponse = $data->isResponse;
 		$sendData = Pack::sendEncode(Pack::encode(serialize($result)));
-		$str = $sendData.PHP_EOL .'====================================='.PHP_EOL;
-		file_put_contents(AT.'/bin/b.txt',$str,FILE_APPEND);
 		$server->send($fd,$sendData);
 	}
 

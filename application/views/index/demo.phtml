@@ -15,8 +15,16 @@
     <h1>hello--------</h1>
 </body>
 <script>
+    console.log('hello');
     var api_url = 'http://at.blogci.cn';
-    var timer = window.setInterval(function () {
+    page.apiGet('/Index/Index/index',{},function ( res ) {
+        console.log(res);
+        if(!res.code === 0){
+            window.clearTimeout(timer);
+            alert('出现问题了');
+        }
+    });
+  /*  var timer = window.setInterval(function () {
         page.apiGet('/Index/Index/index',{},function ( res ) {
             console.log(res);
             if(!res.code === 0){
@@ -24,7 +32,7 @@
                 alert('出现问题了');
             }
         });
-    },200);
+    },200);*/
 
 
 </script>

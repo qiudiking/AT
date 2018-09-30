@@ -11,6 +11,8 @@ namespace server\server;
 
 
 
+use server\Client\Pack;
+use server\Client\TaskParams;
 use server\Log\Log;
 use server\Result\Result;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -23,10 +25,14 @@ class HttpServer extends SwooleServer {
 		$error = handleFatal();
 		if(self::$response){
 			Log::error($error);
-			$json = Result::Instance();
-			$json->setCodeMsg( 'server error', 500 );
 			self::$response->status( 500 );
-			self::$response->end( $json->getJson() );
+			$html = '';
+			if(DEBUG){
+				$json = Result::Instance();
+				$json->setCodeMsg( 'server error', 500 );
+				$html = $json->getJson();
+			}
+			self::$response->end( $html );
 		}
 	}
 
@@ -63,70 +69,93 @@ class HttpServer extends SwooleServer {
 	 *
 	 * @return bool
 	 */
-	public function onRequest(\swoole_http_request $request ,\swoole_http_response $response)
+	public function onRequest(\Swoole\Http\Request $request ,\swoole_http_response $response)
 	{
+			self::$response = $response;
+			$_GET         = isset( $request->get ) ? $request->get : array();
+			$_POST        = isset( $request->post ) ? $request->post : array();
+			$_COOKIE      = isset( $request->cookie ) ? $request->cookie : array();
+			$_FILES       = isset( $request->files ) ? $request->files : array();
+			//清理环境
+			//将请求的一些环境参数放入全局变量桶中
+			$_SERVER             = isset( $request->server ) ? $request->server : array();
+			$header              = isset( $request->header ) ? $request->header : array();
+			$_SESSION     = array();
+			$this->isSendContent = true;
+			foreach ( $_SERVER as $key => $value ) {
+				unset( $_SERVER[ $key ] );
+				$_SERVER[ strtoupper( $key ) ] = $value;
+			}
+			foreach ( $header as $key => $value ) {
+				unset( $_SERVER[ $key ] );
+				$_SERVER[ strtoupper( $key ) ] = $value;
+			}
+			$_SERVER['SWOOLE_WORKER_ID'] = $this->server->worker_id;
+			if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
+				$arr                  = explode( ':', $_SERVER['HOST'] );
+				$_SERVER['HTTP_HOST'] = getArrVal( 0, $arr );
+			}
+			isset( $_SERVER['HTTP_REQUEST_ID'] ) || $_SERVER['HTTP_REQUEST_ID'] = getRandChar( 28 );
+			if($_SERVER['REQUEST_URI'] == '/favicon.ico'){
+				$response->end('');
+				return true;
+			}
+			ob_start();
+			$response->header( 'Access-Control-Allow-Origin', '*' );
+			$response->header( 'Access-Control-Allow-Credentials', 'true' );
+			$response->header( 'Content-Type', 'text/html; charset=utf-8' );
+			\Yaf\Registry::del( 'SWOOLE_HTTP_REQUEST' );
+			\Yaf\Registry::del( 'SWOOLE_HTTP_RESPONSE' );
+			//注册全局信息
+			\Yaf\Registry::set( 'SWOOLE_HTTP_REQUEST', $request );
+			\Yaf\Registry::set( 'SWOOLE_HTTP_RESPONSE', $response );
+			try {
+				$GLOBALS['HTTP_RAW_POST_DATA'] = $request->rawContent();
+				$requestObj                    = new \Yaf\Request\Http( $_SERVER['REQUEST_URI'] );
+				$this->app->bootstrap();
+				$this->app->getDispatcher()->dispatch( $requestObj );
+			} catch ( \server\Exception\ActionSuccessException $actionErrorException ) {
+				//成功处理控制器
+				//echo 'success';
+			} catch ( \server\Exception\ActionErrorException $actionErrorException ) {
+				//错误控制器
+				//echo 'error';
+			} catch ( \Exception $e ) {
+				Log::error('code=' . $e->getCode() . ' : ' . $e->getMessage() . $e->getTraceAsString() );
+				$result_i = Result::Instance();
+				$result_i->setCodeMsg($e->getMessage(),$e->getCode());
+				if(!getArrVal('_is_ajax',$_GET) ==1){
+					$response->status(500);
+					DEBUG || $result_i = '';
+				}
+				echo $result_i;
+			}
 
-		self::$response = $response;
-		$_GET         = isset( $request->get ) ? $request->get : array();
-		$_POST        = isset( $request->post ) ? $request->post : array();
-		$_COOKIE      = isset( $request->cookie ) ? $request->cookie : array();
-		$_FILES       = isset( $request->files ) ? $request->files : array();
-		//清理环境
-		//将请求的一些环境参数放入全局变量桶中
-		$_SERVER             = isset( $request->server ) ? $request->server : array();
-		$header              = isset( $request->header ) ? $request->header : array();
-		$_SESSION     = array();
-		$this->isSendContent = true;
-		foreach ( $_SERVER as $key => $value ) {
-			unset( $_SERVER[ $key ] );
-			$_SERVER[ strtoupper( $key ) ] = $value;
-		}
-		foreach ( $header as $key => $value ) {
-			unset( $_SERVER[ $key ] );
-			$_SERVER[ strtoupper( $key ) ] = $value;
-		}
-		$_SERVER['SWOOLE_WORKER_ID'] = $this->server->worker_id;
-		if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
-			$arr                  = explode( ':', $_SERVER['HOST'] );
-			$_SERVER['HTTP_HOST'] = getArrVal( 0, $arr );
-		}
-		isset( $_SERVER['HTTP_REQUEST_ID'] ) || $_SERVER['HTTP_REQUEST_ID'] = getRandChar( 28 );
-		if($_SERVER['REQUEST_URI'] == '/favicon.ico'){
-			$response->end('');
-			return true;
-		}
+			$result = ob_get_contents();
+			ob_end_clean();
+			if(!isset($_SERVER['IS_RESPONSE'])){
+				$response->end($result);
+			}
+		/*$response->detach();
+		$this->server->task( json_encode($request)  );*/
+	}
 
-		ob_start();
-		$response->header( 'Access-Control-Allow-Origin', '*' );
-		$response->header( 'Access-Control-Allow-Credentials', 'true' );
-		$response->header( 'Content-Type', 'text/html; charset=utf-8' );
-		\Yaf\Registry::del( 'SWOOLE_HTTP_REQUEST' );
-		\Yaf\Registry::del( 'SWOOLE_HTTP_RESPONSE' );
-		//注册全局信息
-		\Yaf\Registry::set( 'SWOOLE_HTTP_REQUEST', $request );
-		\Yaf\Registry::set( 'SWOOLE_HTTP_RESPONSE', $response );
-		try {
-			$GLOBALS['HTTP_RAW_POST_DATA'] = $request->rawContent();
-			$requestObj                    = new \Yaf\Request\Http( $_SERVER['REQUEST_URI'] );
-			$this->app->bootstrap();
-			$this->app->getDispatcher()->dispatch( $requestObj );;
-		} catch ( \server\Exception\ActionSuccessException $actionErrorException ) {
-			//成功处理控制器
-			//echo 'success';
-		} catch ( \server\Exception\ActionErrorException $actionErrorException ) {
-			//错误控制器
-			//echo 'error';
-		} catch ( \Exception $e ) {
-			$result_i = Result::Instance();
-			$result_i->setCodeMsg($e->getMessage(),$e->getCode());
-			Log::error('code=' . $e->getCode() . ' : ' . $e->getMessage() . $e->getTraceAsString() );
-			echo $result_i;
+	/**
+	 * 异步任务
+	 * @param $server
+	 * @param $task_id
+	 * @param $worker_id
+	 * @param $data
+	 */
+	public function onTask( $server, $task_id, $worker_id, $data)
+	{
+		$data = json_decode($data,1);
+		$request = new  \Swoole\Http\Request();
+		foreach ($data as $key => $val){
+			$request->$key = $val;
 		}
-		$result = ob_get_contents();
-		ob_end_clean();
-		if($this->isResponse){
-			$response->end($result);
-		}
+		$response = \Swoole\Http\Response::create($request->fd);
+		$this->onRequest($request,$response);
 	}
 
 	/**

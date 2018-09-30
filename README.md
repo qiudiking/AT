@@ -65,7 +65,11 @@ controller Action 注释作用
 
 API场景的Action请继承Apicommon
 
+- API场景使用的是Worker处理业务
+
 页面场景的Action请继承Common
+
+- 页面场景使用的Task进程处理业务
 
 # MySql操作
 
@@ -75,4 +79,39 @@ API场景的Action请继承Apicommon
 
 **注意:先运行实体再运行工厂**
 
+- 模型
+
+增
+$entity = \Factory\TestEntityFactory::SmEntity();
+
+$entity->username = 'qiufeng1';
+
+$res = $entity->save();
+
+删 
+
+$entity = \Factory\TestEntityFactory::SmEntity(1);
+
+$res = $entity->delete();
+
+改
+
+$entity = \Factory\TestEntityFactory::SmEntity(1);
+
+$entity->username = 'qiufeng1';
+
+$res = $entity->update();
+
+查
+
+$entity = \Factory\TestEntityFactory::SmEntity(1);
+$entity->unsetContainer();
+
+- 数据操作
+
+
+
+# 网络通讯
+- 链接TCP服务的同步/异步请求
+- 链接TCP服务的协程
 

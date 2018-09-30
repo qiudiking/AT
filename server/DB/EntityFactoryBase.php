@@ -34,7 +34,7 @@ abstract class EntityFactoryBase {
 		}
 		if ( ! $instance ) {
 			$instance                     = new $class( $id );
-			//self::$instanceList[  ] = $instance;
+			//self::$instanceList[ $class ] = $instance;
 		}else{
 			self::initEntity( $class, $instance );
 		}

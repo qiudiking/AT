@@ -81,13 +81,13 @@ class CoroutineClient {
 	}
 
 	/**
-	 * 获取链接
 	 * @param $host
 	 * @param $port
 	 *
 	 * @return mixed|\Swoole\Coroutine\Client
+	 * @throws \server\Exception\ClientException
 	 */
-	public function get($host,$port,$re = false)
+	public function get($host,$port)
 	{
 		//有空闲连接
 		$key = $this->clientKey($host,$port);
@@ -95,7 +95,7 @@ class CoroutineClient {
 			$client =  array_shift(self::$pool[$key]);
 			if(!$client->isConnected()){
 				unset($client);
-				$client = $this->get($host,$port,true);
+				$client = $this->get($host,$port);
 			}
 		}else{
 			//无空闲连接，创建新连接
@@ -110,17 +110,10 @@ class CoroutineClient {
 			$client->set($config);
 			$res = $client->connect($host, $port,-1);
 			if ($res === false) {
-				Log::log($client->errCode);
-				$client = false;
+				throw new ClientException('协程链接服务器错误',$client->errCode);
 			} else {
 				Log::log('协程链接成功');
 			}
-		}
-		if($re){
-			Log::log('重新链接成功====');
-		}
-		if(!$client instanceof \Swoole\Coroutine\Client){
-			 $client = $this->get($host,$port,true);;
 		}
 		return $client;
 	}

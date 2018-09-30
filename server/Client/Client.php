@@ -45,8 +45,10 @@ class Client {
 	 * 异步发送数据
 	 * @param      $params
 	 * @param bool $isResponse
+	 * @param null $callback
 	 *
 	 * @return bool
+	 * @throws \server\Exception\ClientException
 	 */
 	public function invokeAsyncTcp($params,$isResponse = false,$callback =null)
 	{
@@ -111,26 +113,33 @@ class Client {
 					}
 				}
 			});
-			$client->on( "error", function ( \swoole_client $cli ) use ($host,$port) {
+			$client->on( "error", function ( \swoole_client $cli ) use ($host,$port,$clientParam) {
 				unset(self::$client[md5('Async',$host.$port)]);
-				print_r( "异步发生错误 \n" );
+				if($clientParam->isResponse){
+					$result=Result::Instance();
+					$result->setRequestId( $clientParam->request_id );
+					$result->setCodeMsg('异步客户端错误',$cli->errCode);
+					Response::responseToHttp($clientParam->request_id,$result);
+				}
+				Log::error('异步客户端错误,code='.$cli->errCode);
 			} );
 			$client->on( "close", function ( \swoole_client $cli )use ($host,$port) {
 				unset(self::$client[md5('Async',$host.$port)]);
-				print_r( "异步TCP连接关闭" );
+				Log::warning( "异步TCP连接关闭" );
 			} );
 			$this->connect($client,$host,$port);
 		}
-
 	}
 
 	/**
 	 * 异步请求TCP服务 并自动http响应
 	 * @param $params
+	 *
+	 * @throws \server\Exception\ClientException
 	 */
 	public function  invokeAsyncResponse($params){
 		//$params  = func_get_args();
-		HttpServer::getInstance()->isResponse = false;
+		$_SERVER['IS_RESPONSE'] = true;
 		$request_id = getRequestId();
 		if($request_id){
 			$data = [];
@@ -176,10 +185,18 @@ class Client {
 		    }
 		}else{
 			$client = new \swoole_client(SWOOLE_SOCK_TCP | SWOOLE_KEEP);
-			self::$client[md5('sync',$host.$port)] = $client;
+			$config = [
+				'open_length_check'     => true,
+				'package_length_type'   => 'N',
+				'package_max_length'    => 1024*1024*4,//10M
+				'package_body_offset'   => 4,
+				'package_length_offset' => 0,
+			];
+			$client->set( $config );
 			if (!$this->connect($client,$host, $port)) {
 
 			}
+			self::$client[md5('sync',$host.$port)] = $client;
 		}
 		$clientParam             = ClientParams::instance();
 		if(!isset($params[0])){
@@ -192,10 +209,18 @@ class Client {
 
 		//向服务器发送数据
 		if (!$client->send($sendData)) {
-
+			unset(self::$client[md5('sync',$host.$port)]);
+			Log::warning('发送数失败');
+			return $this->invokeTcp($params);
 		}
 		//从服务器接收数据
 		$res = $client->recv();
+		if(!$res){
+			unset(self::$client[md5('sync',$host.$port)]);
+			Log::warning('接收数据失败');
+			//throw new ClientException('接收数据错误',$client->errCode);
+			return $this->invokeTcp($params);
+		}
 		$data = unserialize( Pack::decode( Pack::decodeData( $res ) ) );
 		if($data instanceof  ClientParams){
 			if ( ! is_null( $data->exception_message ) ) {
@@ -207,17 +232,17 @@ class Client {
 	}
 
 	/**
-	 * 链接TCP服务
 	 * @param \swoole_client $client
 	 * @param                $host
 	 * @param                $port
 	 *
 	 * @return bool
+	 * @throws \server\Exception\ClientException
 	 */
 	public function connect(\swoole_client $client , $host, $port )
 	{
 		if ( ! $client->connect( $host, $port ) ) {
-			return false;
+			throw new ClientException('链接服务器错误',$client->errCode);
 		}
 		return true;
 	}
