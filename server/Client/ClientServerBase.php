@@ -13,7 +13,7 @@ namespace server\Client;
 
 abstract class ClientServerBase {
 	/**
-	 * @var \Result\Result
+	 * @var \server\Result
 	 */
 	public $result;
 	public function __construct() {

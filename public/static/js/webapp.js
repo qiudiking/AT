@@ -219,7 +219,6 @@ webapp.get = function ( url , param , successFunc , errorFunc , method , async ,
     
     $.ajax( {
         type     : method , data: param , url: url , dataType: 'json' , async: async , success: function ( response ) {
-            console.log(response);
             webapp.closeLoading();
             if ( typeof successFunc === 'function' ) {
                 successFunc( response );
@@ -935,16 +934,7 @@ webapp.filterUndefined = function ( obj ) {
 };
 
 webapp._order_track_no = '';
-webapp.onBridgeReady   = function ( data ) {
-    if ( !data )return false;
-    WeixinJSBridge.invoke( 'getBrandWCPayRequest' , data , function ( res ) {
-        if ( res.err_msg === "get_brand_wcpay_request:ok" ) {
-            webapp.success( '支付成功' , 500 , '/Index/pay/paySuccess?track_no=' + webapp._order_track_no + '&type=recharge' );
-        } else {
-            alert( res.err_msg );
-        }
-    } );
-};
+
 /**
  * 显示更多菜单
  * @constructor

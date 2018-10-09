@@ -56,10 +56,10 @@
          * @param res
          */
         page.doChkLogin = function ( res ) {
-            if ( res.code === 20009 ) {
-                webapp.error( '登录已超时，请重新登录' );
+            if ( res.code === 301 ) {
+                webapp.error( res.msg || '跳转中' );
                 setTimeout( function () {
-                    var login = '/Index/Weixin/login'
+                        var login = res.url
                                 + '?return=' + encodeURIComponent( location.href );
                     if ( window.top !== window.self ) {
                         window.top.location = login;
@@ -67,16 +67,6 @@
                         window.location.href = login;
                     }
                 } , 2000 );
-            }else if(res.code ===20017){
-                /*webapp.error( '登录已超时' );*/
-                setTimeout( function () {
-                    var login = '/Index/Login/pcQrCodeLogin?return=' + encodeURIComponent( location.href );
-                    if ( window.top !== window.self ) {
-                        window.top.location = login;
-                    } else {
-                        window.location.href = login;
-                    }
-                } , 500 );
             }
         };
         /**
@@ -146,11 +136,7 @@
             return hex_sha1( BASE64.encoder( password ) + secretKey );
         };
 
-        page.browseHistory=function () {
-            page.apiPost('/Index/Challenge/readCount',{tag:webapp.getUrlParam('tag')},function ( res ) {
-            
-            })
-        };
+      
         page.deleteImage = function ( obj ) {
             
             $(obj).parent().remove();
@@ -166,20 +152,7 @@
                 }
             } , errorFunc , true , true );
         };
-        /**
-         * 获取哈希
-         * @param func
-         */
-        page.getRequestHash = function ( func ) {
-            
-            page.apiGet( '/Index/Hash/createHash' , {} , function ( response ) {
-                try {
-                    func( response );
-                } catch ( e ) {
-                    webapp.error( '不好意思，发生异常啦！' );
-                }
-            } )
-        };
+       
         page.wxIsInit = false;
         page.shartData = {
             title: '协协通', // 分享标题
@@ -194,9 +167,9 @@
             desc:''
         };
         page.wxInitCallback = [];
-        page.wxConfig = function (callback) {
+        page.wxConfig = function (url,callback) {
             webapp.is_show_loading=false;
-            page.apiPost( '/Index/Weixin/getWxSign' , {url: location.href} , function ( res ) {
+            page.apiPost( url , {url: location.href} , function ( res ) {
                  if(res.code === 0){
                      var configData = {};
     
@@ -418,34 +391,7 @@
             };
             this.loadUrl();
         };
-        /**
-         * 赞助商排行榜
-         * @param tag
-         */
-        page.showSponsorListAtHome = function ( tag) {
-            page.apiGet('/Index/Challenge/sponsorSortListToday?tag='+tag,'',function ( res ) {
-//                console.log(res);
-                var zanzhuPeople = 1;
-                var list = "";
-                if(res.data.data){
-                    var sponsorList = res.data.data;
-                    for(var k in sponsorList){
-                        var uid = sponsorList[k].uid;
-                        var sponsorUsers = res.data.sponsorUsers;
-                        if(zanzhuPeople>=4){
-                            list += '<div><a href="'+page.sponsorShow(sponsorList[k].uid)+'"><img src="' + sponsorUsers[uid].logo + '" alt=""></a>'
-                                    + '<p class="text-center">' + sponsorUsers[uid].name + '</p></div>'
-                            $('.advertising-logo').html(list);
-                        }else {
-                            $('#advertisingLeft'+zanzhuPeople).attr('src',sponsorUsers[uid].logo);
-                            $('#advertisingName'+zanzhuPeople).text(sponsorUsers[uid].name);
-                            $('#advertisingImg'+zanzhuPeople).attr('href','/sponsorShow?id='+sponsorList[k].uid);
-                        }
-                        zanzhuPeople++;
-                    }
-                }
-            })
-        };
+        
         /**
          * 获取首页链接
          * @param tag

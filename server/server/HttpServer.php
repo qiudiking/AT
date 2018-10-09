@@ -109,6 +109,7 @@ class HttpServer extends SwooleServer {
 			//注册全局信息
 			\Yaf\Registry::set( 'SWOOLE_HTTP_REQUEST', $request );
 			\Yaf\Registry::set( 'SWOOLE_HTTP_RESPONSE', $response );
+			$result_i = Result::Instance();
 			try {
 				$GLOBALS['HTTP_RAW_POST_DATA'] = $request->rawContent();
 				$requestObj                    = new \Yaf\Request\Http( $_SERVER['REQUEST_URI'] );
@@ -117,12 +118,15 @@ class HttpServer extends SwooleServer {
 			} catch ( \server\Exception\ActionSuccessException $actionErrorException ) {
 				//成功处理控制器
 				//echo 'success';
-			} catch ( \server\Exception\ActionErrorException $actionErrorException ) {
-				//错误控制器
-				//echo 'error';
+			} catch ( \server\Exception\RedirectException $redirectException ) {
+				//301控制器
+				Log::warning('301重定向跳转');
+				$result_i->set('url',$redirectException->getRedirect_url());
+				$result_i->setCodeMsg($redirectException->getMessage(),$redirectException->getCode());
+				echo $result_i;
 			} catch ( \Exception $e ) {
 				Log::error('code=' . $e->getCode() . ' : ' . $e->getMessage() . $e->getTraceAsString() );
-				$result_i = Result::Instance();
+
 				$result_i->setCodeMsg($e->getMessage(),$e->getCode());
 				if(!getArrVal('_is_ajax',$_GET) ==1){
 					$response->status(500);
@@ -133,7 +137,7 @@ class HttpServer extends SwooleServer {
 
 			$result = ob_get_contents();
 			ob_end_clean();
-			if(!isset($_SERVER['IS_RESPONSE'])){
+			if(!isset($_SERVER['IS_RESPONSE']  )){
 				$response->end($result);
 			}
 		/*$response->detach();
@@ -166,7 +170,6 @@ class HttpServer extends SwooleServer {
 	{
 		$this->app = new \Yaf\Application( AT . "/conf/application.ini" );
 		$objSamplePlugin = new \SamplePlugin();
-		Log::log($this->serverName.'服务启动SUCCESS....');
 		$this->app->getDispatcher()->registerPlugin( $objSamplePlugin );
 		if(!$server->taskworker){
 			$process_name = $this->set_process_name('Worker');
@@ -174,6 +177,7 @@ class HttpServer extends SwooleServer {
 			$process_name = $this->set_process_name('Task');
 		}
 		cli_set_process_title($process_name);
+		Log::log($this->serverName.'服务启动SUCCESS....');
 	}
 
 

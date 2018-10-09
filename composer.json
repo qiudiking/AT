@@ -1,7 +1,8 @@
 {
     "require": {
         "symfony/console": "@stable",
-        "hassankhan/config": "*"
+        "hassankhan/config": "*",
+        "swlib/saber" :"1.0.0"
     },
     "autoload": {
         "psr-4":{

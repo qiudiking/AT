@@ -1,18 +1,41 @@
 <?php
-
 /**
- * Class ApicommonController
+ * Created by PhpStorm.
+ * User: htpc
+ * Date: 2018/10/9
+ * Time: 15:57
  */
-class ApicommonController extends Yaf\Controller_Abstract
+
+namespace server\YafController;
+
+
+class YafController extends \Yaf\Controller_Abstract
 {
+
 	/**
-	 * @var server\Result\Result
+	 * @var \server\Result\Result
 	 */
 	public $result;
 
 	public function init()
 	{
 		$this->result = \server\Result\Result::Instance();
+	}
+
+	/**
+	 * 301重定向 url跳转
+	 * @param string $url
+	 *
+	 * @return bool|void
+	 * @throws \Exception
+	 */
+	public function redirect( $url ,$msg = '' ) {
+		if(!isAjaxRequest()){
+			\server\server\HttpServer::$response->redirect($url);
+		}
+		$exception =   new \server\Exception\RedirectException($msg);
+		$exception->setRedirect_url($url);
+		throw $exception;
 	}
 
 	/**
@@ -23,12 +46,12 @@ class ApicommonController extends Yaf\Controller_Abstract
 	{
 		$params = func_get_args();
 		if($params){
-			\server\Client\Client::instance()->invokeTcp($params);
+			return \server\Client\Client::instance()->invokeTcp($params);
 		}
 	}
 
 	/**
-	 * 异步调用 最后一个参数是函数的，将做异步回调
+	 * 异步调用  最后一个参数是函数的，将做异步回调
 	 */
 	public function invokeAsync()
 	{
@@ -50,7 +73,7 @@ class ApicommonController extends Yaf\Controller_Abstract
 	}
 
 	/**
-	 * 协程调用TCP服务
+	 * 协程调用
 	 * @return bool|null
 	 * @throws \server\Exception\ClientException
 	 */

@@ -13,7 +13,7 @@ class Bootstrap extends Yaf\Bootstrap_Abstract {
 		//把配置保存起来
 		$arrConfig = Yaf\Application::app()->getConfig();
 		Yaf\Registry::set('config', $arrConfig);
-	    Yaf\Dispatcher::getInstance()->autoRender(FALSE);
+	    Yaf\Dispatcher::getInstance()->autoRender(false);//自动渲染View
 	}
 
 	public function _initPlugin(Yaf\Dispatcher $dispatcher) {

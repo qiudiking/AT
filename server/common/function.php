@@ -303,3 +303,15 @@ function real_strip_tags($str, $allowable_tags="") {
 
 	return $s;
 }
+
+/**
+ * 是否为ajax请求
+ * @return bool
+ */
+function isAjaxRequest()
+{
+	if(isset($_SERVER['X-REQUESTED-WITH']) && $_SERVER['X-REQUESTED-WITH'] = 'XMLHttpRequest' ){
+		return true;
+	}
+	return false;
+}

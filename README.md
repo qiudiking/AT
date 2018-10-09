@@ -61,15 +61,8 @@ controller Action 注释作用
 也可以在Action的注释中设置某个Action需要API签名 例如: @sign true签名 false不签名
 
 # 场景选择
-- AT框架分为两种场景应用 API 页面显示
+- AT框架分为两种场景应用 API 页面显示 都是继承YafController
 
-API场景的Action请继承Apicommon
-
-- API场景使用的是Worker处理业务
-
-页面场景的Action请继承Common
-
-- 页面场景使用的Task进程处理业务
 
 # MySql操作
 
