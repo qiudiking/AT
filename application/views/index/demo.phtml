@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>测试</title>
     <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/config.js"></script>
     <script src="/static/js/webapp.js?v=<?=$version?>"></script>
     <script src="/static/js/page.js?v=<?=$version?>"></script>
     <script src="/static/js/sha1.js?v=<?=$version?>"></script>
@@ -15,8 +16,7 @@
     <h1>hello--------</h1>
 </body>
 <script>
-    console.log('hello');
-    var api_url = 'http://at.blogci.cn';
+
     page.apiGet('/Index/Index/index',{},function ( res ) {
         console.log(res);
         if(!res.code === 0){

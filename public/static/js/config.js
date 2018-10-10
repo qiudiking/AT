@@ -1,0 +1,1 @@
+window.api_url = 'http://at.blogci.cn';

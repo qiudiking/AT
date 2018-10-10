@@ -6,6 +6,7 @@ AT微型php框架,主要基于swoole和yaf开发的一个轻量级框架,简单�
 - php>=7
 - php扩展: swoole>=4.0.4 yaf>=3.0.6 yac>=2.0.2 seaslog>=1.7.6
 
+
 # 服务
 - 服务HTTP
 
@@ -106,5 +107,7 @@ $entity->unsetContainer();
 
 # 网络通讯
 - 链接TCP服务的同步/异步请求
-- 链接TCP服务的协程
+- 链接TCP服务的协程  
+
+使用协程返回后可能全局变量和static变量会改变
 

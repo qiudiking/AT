@@ -66,7 +66,7 @@
                     } else {
                         window.location.href = login;
                     }
-                } , 2000 );
+                } , 1000 );
             }
         };
         /**
@@ -143,7 +143,7 @@
         };
         
         page.apiPost = function ( pathInfo , param , successFunc , errorFunc ) {
-            webapp.post( api_url + pathInfo , param , function ( res ) {
+            webapp.post( api_url || '/' + pathInfo , param , function ( res ) {
                 if ( page.isChkLogin ) {
                     page.doChkLogin( res );
                 }

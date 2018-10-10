@@ -11,12 +11,17 @@ class IndexController extends YafController
 
 	public function indexAction()
 	{
-		$this->display('index');
+		$data = $this->invokeCoroutine('\App\Demo::hello');
+		$data = $this->invokeCoroutine('\App\Demo::hello');
+		\server\Log\Log::log(\Swoole\Coroutine::getuid());
+		echo json_encode(seaslog_get_version());
+		//$this->display('index');
 	}
 
 	public function demoAction()
 	{
-		$this->getView()->display('index/demo.phtml');
+		$this->invokeAsyncResponse('\App\Demo::hello');
+		//$this->display('demo');
 	}
 
 	public function demo2Action(){

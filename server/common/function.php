@@ -4,6 +4,28 @@ function checkExtension()
 	if (!extension_loaded('swoole')) {
 		return "[扩展依赖]缺少swoole扩展";
 	}
+	if (version_compare(SWOOLE_VERSION, '4.0.0', '<')) {
+		return "[版本错误]Swoole版本必须大于4.0.0\n";
+	}
+	if (!extension_loaded('yaf')) {
+		return "[扩展依赖]缺少yaf扩展";
+	}
+		if (version_compare(Yaf\VERSION, '3.0.6', '<')) {
+		return "[版本错误]yaf版本必须大于3.0.6\n";
+	}
+	if (!extension_loaded('yac')) {
+		return "[扩展依赖]缺少yac扩展";
+	}
+	if (version_compare(YAC_VERSION, '2.0.2', '<')) {
+		return "[版本错误]yac版本必须大于2.0.2\n";
+	}
+
+	if (!extension_loaded('SeasLog')) {
+		return "[扩展依赖]缺少SeasLog扩展";
+	}
+	if (version_compare(seaslog_get_version(), '1.7.6', '<')) {
+		return "[版本错误]SeasLog版本必须大于1.7.6\n";
+	}
 	if (extension_loaded('xhprof')) {
 		return "[扩展错误]不允许加载xhprof扩展，请去除";
 	}
@@ -305,7 +327,7 @@ function real_strip_tags($str, $allowable_tags="") {
 }
 
 /**
- * 是否为ajax请求
+ * 根据$_SERVER判断是否为ajax请求
  * @return bool
  */
 function isAjaxRequest()
@@ -314,4 +336,31 @@ function isAjaxRequest()
 		return true;
 	}
 	return false;
+}
+
+/**
+ * 设置cookie信息
+ * @param        $name
+ * @param null   $value
+ * @param int    $expires
+ * @param string $path
+ * @param string $domain
+ * @param bool   $secure
+ * @param bool   $httponly
+ */
+function setCookieInfo($name, $value = null, $expires = 0, $path = '/', $domain = '', $secure = false, $httponly = false){
+	if ( php_sapi_name() == 'cli' ) {
+		server\server\HttpServer::$response->cookie( $name, $value, $expires, $path, $domain, $secure, $httponly );
+	}
+}
+
+/**
+ * 获取cookie信息
+ * @param $name
+ *
+ * @return mixed
+ */
+function getCookie($name)
+{
+	return $_COOKIE[$name];
 }

@@ -11,6 +11,7 @@ namespace server\Client;
 
 
 use Noodlehaus\Config;
+use server\CoroutineClient\CoroutineContent;
 use server\Exception\ClientException;
 use server\Log\Log;
 use server\server\HttpServer;
@@ -52,12 +53,14 @@ class Client {
 	 */
 	public function invokeAsyncTcp($params,$isResponse = false,$callback =null)
 	{
+		\server\Log\Log::log(\Swoole\Coroutine::getuid());
 		$host = $this->config['TCPserver']['server.host'];
 		$port = $this->config['TCPserver']['server.port'];
 		$clientParam             = ClientParams::instance();
 		if(!isset($params[0])){
 			return false;
 		}
+
 		$clientParam->method     = $params[0];
 		$clientParam->callParams = $params;
 		$clientParam->isResponse = $isResponse;
@@ -66,11 +69,11 @@ class Client {
 
 		if(isset(self::$client[md5('Async',$host.$port)])){
 			$client = self::$client[md5('Async',$host.$port)];
-			//Log::log($client->isConnected());
 		    if($client->isConnected()){
 		        $client->send($sendData);
 		        return true;
 		    }else{
+
 		    	$this->connect($client,$host,$port);
 		    }
 		}else{
@@ -139,7 +142,7 @@ class Client {
 	 */
 	public function  invokeAsyncResponse($params){
 		//$params  = func_get_args();
-		$_SERVER['IS_RESPONSE'] = true;
+		CoroutineContent::put('IS_RESPONSE',true);
 		$request_id = getRequestId();
 		if($request_id){
 			$data = [];
@@ -159,7 +162,7 @@ class Client {
 		if($params){
 			$index=count($params)-1;
 			$callback = $params[$index];
-			if(!is_callable($callback)){
+			if($index == 0 || (!is_callable($callback))){
 			    $callback = null;
 			}else{
 				unset($params[$index]);

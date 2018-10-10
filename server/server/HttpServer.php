@@ -13,6 +13,7 @@ namespace server\server;
 
 use server\Client\Pack;
 use server\Client\TaskParams;
+use server\CoroutineClient\CoroutineContent;
 use server\Log\Log;
 use server\Result\Result;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -81,7 +82,6 @@ class HttpServer extends SwooleServer {
 			$_SERVER             = isset( $request->server ) ? $request->server : array();
 			$header              = isset( $request->header ) ? $request->header : array();
 			$_SESSION     = array();
-			$this->isSendContent = true;
 			foreach ( $_SERVER as $key => $value ) {
 				unset( $_SERVER[ $key ] );
 				$_SERVER[ strtoupper( $key ) ] = $value;
@@ -137,9 +137,10 @@ class HttpServer extends SwooleServer {
 
 			$result = ob_get_contents();
 			ob_end_clean();
-			if(!isset($_SERVER['IS_RESPONSE']  )){
+			if(!CoroutineContent::get('IS_RESPONSE')){
 				$response->end($result);
 			}
+			CoroutineContent::delete();
 		/*$response->detach();
 		$this->server->task( json_encode($request)  );*/
 	}
