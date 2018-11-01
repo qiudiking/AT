@@ -7,7 +7,7 @@
  */
 
 namespace server\Exception;
-use Log\Log;
+use server\Log\Log;
 
 /**
  * 快速抛出异常
@@ -37,7 +37,7 @@ class ThrowException
 	 */
     public static function OrderException($code,$msg='')
     {
-      //  Log::error( '订单异常:msg=' . $msg . ' ; code=' . $code );
+        Log::error( '订单异常:msg=' . $msg . ' ; code=' . $code );
         throw new OrderException(  $msg ,$code);
     }
 
@@ -74,6 +74,8 @@ class ThrowException
 	 */
     public static function ProvideException($code,$msg='')
     {
+	    $msg || $msg = ErrorHandler::getErrMsg( $code );
+	    Log::error( '系统异常:msg=' . $msg . ' ; code=' . $code );
         throw new ProvideException( $code , $msg );
     }
 
@@ -87,7 +89,7 @@ class ThrowException
     public static function SystemException( $code , $msg = '' )
     {
         $msg || $msg = ErrorHandler::getErrMsg( $code );
-        //Log::error( '系统异常:msg=' . $msg . ' ; code=' . $code );
+        Log::error( '系统异常:msg=' . $msg . ' ; code=' . $code );
         throw new SystemException( $code , $msg );
     }
 
@@ -100,7 +102,7 @@ class ThrowException
     public static function MongodbException( $code , $msg ='')
     {
         $msg || $msg = ErrorHandler::getErrMsg( $code );
-        //Log::error( 'mongodb异常:msg=' . $msg . ' ; code=' . $code );
+        Log::error( 'mongodb异常:msg=' . $msg . ' ; code=' . $code );
         throw new MongodbException( $code , $msg );
     }
 

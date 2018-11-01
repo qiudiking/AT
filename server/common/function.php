@@ -332,10 +332,15 @@ function real_strip_tags($str, $allowable_tags="") {
  */
 function isAjaxRequest()
 {
-	if(isset($_SERVER['X-REQUESTED-WITH']) && $_SERVER['X-REQUESTED-WITH'] = 'XMLHttpRequest' ){
+	if ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && $_SERVER['HTTP_X_REQUESTED_WITH'] == 'XMLHttpRequest' ) {
 		return true;
+	} elseif ( ! empty( $_SERVER['X-REQUESTED-WITH'] ) && $_SERVER['X-REQUESTED-WITH'] == 'XMLHttpRequest' ) {
+		return true;
+	} elseif ( getSafe('_is_ajax')=='1') {
+		return true;
+	} else {
+		return false;
 	}
-	return false;
 }
 
 /**
@@ -350,7 +355,10 @@ function isAjaxRequest()
  */
 function setCookieInfo($name, $value = null, $expires = 0, $path = '/', $domain = '', $secure = false, $httponly = false){
 	if ( php_sapi_name() == 'cli' ) {
-		server\server\HttpServer::$response->cookie( $name, $value, $expires, $path, $domain, $secure, $httponly );
+		$response = \server\CoroutineClient\CoroutineContent::get('response');
+		if($response instanceof swoole_http_response){
+			$response->cookie( $name, $value, $expires, $path, $domain, $secure, $httponly );
+		}
 	}
 }
 
@@ -360,7 +368,7 @@ function setCookieInfo($name, $value = null, $expires = 0, $path = '/', $domain 
  *
  * @return mixed
  */
-function getCookie($name)
+function getCookie( $name )
 {
 	return $_COOKIE[$name];
 }

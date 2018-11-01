@@ -134,6 +134,9 @@ class SwooleServer {
 			if($class && $method ){
 				if(class_exists($class)){
 				    $instance = new $class;
+				    if(method_exists($instance,'init')){
+					    call_user_func(array($instance,'init'));
+				    }
 				    if(method_exists($instance,$method)){
 					    $result->result = call_user_func_array( array( $instance, $method ), $data->callParams );
 				    }else{

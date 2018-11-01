@@ -17,22 +17,19 @@
 </body>
 <script>
 
-    page.apiGet('/Index/Index/index',{},function ( res ) {
-        console.log(res);
-        if(!res.code === 0){
-            window.clearTimeout(timer);
-            alert('出现问题了');
-        }
-    });
-  /*  var timer = window.setInterval(function () {
-        page.apiGet('/Index/Index/index',{},function ( res ) {
-            console.log(res);
-            if(!res.code === 0){
-                window.clearTimeout(timer);
-                alert('出现问题了');
+    var timer = window.setInterval(function () {
+        var rand = parseInt(10000*Math.random());
+        page.apiGet('/Index/Index/index',{rand:rand},function ( res ) {
+            console.log( res );
+            console.log( rand );
+            if ( Number( res ) === rand ) {
+                console.log( '等于' );
+            } else {
+                window.clearTimeout( timer );
+                alert( '错误===========' );
             }
-        });
-    },200);*/
+        })
+    },200);
 
 
 </script>

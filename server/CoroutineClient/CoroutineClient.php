@@ -14,6 +14,7 @@ use server\Client\ClientParams;
 use server\Client\Pack;
 use server\Exception\ClientException;
 use server\Log\Log;
+use Swoole\Coroutine;
 
 class CoroutineClient {
 
@@ -52,11 +53,14 @@ class CoroutineClient {
 		$clientParam->callParams = $params;
 		$clientParam->request_id = getRequestId();
 		$sendData           = Pack::sendEncode( Pack::encode( serialize($clientParam) ) );
+
 		$client->send($sendData);
 		$res = $client->recv();
+		$_SERVER['CID'] = Coroutine::getuid();
 		if(empty($res)){
 		   return  $this->send($params);
 		}
+		$this->getGlobal();
 		$this->put($client,$host,$port);
 		$data = unserialize( Pack::decode( Pack::decodeData( $res ) ) );
 		if($data instanceof  ClientParams){
@@ -66,6 +70,36 @@ class CoroutineClient {
 			unset( $res );
 			return $data->result;
 		}
+	}
+
+	/**
+	 * 保存全局变量
+	 */
+	public function putGlobal()
+	{
+		CoroutineContent::put('get',$_GET);
+		CoroutineContent::put('post',$_POST);
+		CoroutineContent::put('server',$_SERVER);
+		CoroutineContent::put('cookie',$_COOKIE);
+		CoroutineContent::put('files',$_FILES);
+		CoroutineContent::put('env',$_ENV);
+		CoroutineContent::put('request',$_REQUEST);
+		CoroutineContent::put('session',$_SESSION);
+	}
+
+	/**
+	 * 获取全局变量
+	 */
+	public function getGlobal()
+	{
+		$_GET = CoroutineContent::get('get');
+		$_POST = CoroutineContent::get('post');
+		$_SERVER = CoroutineContent::get('server');
+		$_COOKIE = CoroutineContent::get('cookie');
+		$_FILES = CoroutineContent::get('files');
+		$_ENV = CoroutineContent::get('env');
+		$_REQUEST = CoroutineContent::get('request');
+		$_SESSION = CoroutineContent::get('session');
 	}
 
 	/**

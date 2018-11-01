@@ -16,6 +16,7 @@ use server\Client\TaskParams;
 use server\CoroutineClient\CoroutineContent;
 use server\Log\Log;
 use server\Result\Result;
+use Swoole\Coroutine;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 class HttpServer extends SwooleServer {
@@ -24,32 +25,30 @@ class HttpServer extends SwooleServer {
 	 */
 	public  function handleFatal(){
 		$error = handleFatal();
-		if(self::$response){
-			Log::error($error);
-			self::$response->status( 500 );
+		if(isset($_SERVER['CID'])){
+			$response = self::$response[$_SERVER['CID']];
+		}
+		if(isset($response) && $response instanceof \swoole_http_response){
+			Log::log($error);
+			unset(self::$response[$_SERVER['CID']]);
+			$response->status( 500 );
 			$html = '';
 			if(DEBUG){
 				$json = Result::Instance();
 				$json->setCodeMsg( 'server error', 500 );
 				$html = $json->getJson();
 			}
-			self::$response->end( $html );
+			$response->end( $html );
 		}
 	}
 
 	/**
-	 * @var \swoole_http_response
-	 */
-	public static $response;
-	/**
 	 * @var \Yaf\Application
 	 */
 	public $app;
-	/**
-	 * 响应
-	 * @var bool
-	 */
-	public $isResponse = true;
+
+	public static $response = [];
+
 	/**
 	 * @var \swoole_http_server
 	 */
@@ -65,6 +64,22 @@ class HttpServer extends SwooleServer {
 	}
 
 	/**
+	 * 保存response
+	 * @param $response
+	 */
+	public function saveResponse( \swoole_http_response $response)
+	{
+		if(DFS){
+			$cid = Coroutine::getuid();
+		}else{
+			$cid = getRequestId();
+		}
+		self::$response[$cid] = $response;
+		$_SERVER['CID'] = $cid;
+	}
+
+	/**
+	 * HTTP请求
 	 * @param \swoole_http_request  $request
 	 * @param \swoole_http_response $response
 	 *
@@ -72,30 +87,36 @@ class HttpServer extends SwooleServer {
 	 */
 	public function onRequest(\Swoole\Http\Request $request ,\swoole_http_response $response)
 	{
-			self::$response = $response;
+		$_SERVER             = isset( $request->server ) ? $request->server : array();
+		$header              = isset( $request->header ) ? $request->header : array();
+		foreach ( $_SERVER as $key => $value ) {
+			unset( $_SERVER[ $key ] );
+			$_SERVER[ strtoupper( $key ) ] = $value;
+		}
+		foreach ( $header as $key => $value ) {
+			unset( $_SERVER[ $key ] );
+			$_SERVER[ strtoupper( $key ) ] = $value;
+		}
+		if( !DFS && isAjaxRequest() && !$this->server->taskworker){
+			$response->detach();
+			$this->server->task( json_encode($request)  );
+		}else{
 			$_GET         = isset( $request->get ) ? $request->get : array();
 			$_POST        = isset( $request->post ) ? $request->post : array();
 			$_COOKIE      = isset( $request->cookie ) ? $request->cookie : array();
 			$_FILES       = isset( $request->files ) ? $request->files : array();
 			//清理环境
 			//将请求的一些环境参数放入全局变量桶中
-			$_SERVER             = isset( $request->server ) ? $request->server : array();
-			$header              = isset( $request->header ) ? $request->header : array();
 			$_SESSION     = array();
-			foreach ( $_SERVER as $key => $value ) {
-				unset( $_SERVER[ $key ] );
-				$_SERVER[ strtoupper( $key ) ] = $value;
-			}
-			foreach ( $header as $key => $value ) {
-				unset( $_SERVER[ $key ] );
-				$_SERVER[ strtoupper( $key ) ] = $value;
-			}
+
 			$_SERVER['SWOOLE_WORKER_ID'] = $this->server->worker_id;
 			if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
 				$arr                  = explode( ':', $_SERVER['HOST'] );
 				$_SERVER['HTTP_HOST'] = getArrVal( 0, $arr );
 			}
 			isset( $_SERVER['HTTP_REQUEST_ID'] ) || $_SERVER['HTTP_REQUEST_ID'] = getRandChar( 28 );
+			CoroutineContent::put('response',$response);
+			$this->saveResponse($response);
 			if($_SERVER['REQUEST_URI'] == '/favicon.ico'){
 				$response->end('');
 				return true;
@@ -111,7 +132,7 @@ class HttpServer extends SwooleServer {
 			\Yaf\Registry::set( 'SWOOLE_HTTP_RESPONSE', $response );
 			$result_i = Result::Instance();
 			try {
-				$GLOBALS['HTTP_RAW_POST_DATA'] = $request->rawContent();
+				DFS && $GLOBALS['HTTP_RAW_POST_DATA'] = $request->rawContent();
 				$requestObj                    = new \Yaf\Request\Http( $_SERVER['REQUEST_URI'] );
 				$this->app->bootstrap();
 				$this->app->getDispatcher()->dispatch( $requestObj );
@@ -128,7 +149,7 @@ class HttpServer extends SwooleServer {
 				Log::error('code=' . $e->getCode() . ' : ' . $e->getMessage() . $e->getTraceAsString() );
 
 				$result_i->setCodeMsg($e->getMessage(),$e->getCode());
-				if(!getArrVal('_is_ajax',$_GET) ==1){
+				if(!isAjaxRequest()){
 					$response->status(500);
 					DEBUG || $result_i = '';
 				}
@@ -141,8 +162,7 @@ class HttpServer extends SwooleServer {
 				$response->end($result);
 			}
 			CoroutineContent::delete();
-		/*$response->detach();
-		$this->server->task( json_encode($request)  );*/
+		}
 	}
 
 	/**

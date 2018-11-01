@@ -53,7 +53,6 @@ class Client {
 	 */
 	public function invokeAsyncTcp($params,$isResponse = false,$callback =null)
 	{
-		\server\Log\Log::log(\Swoole\Coroutine::getuid());
 		$host = $this->config['TCPserver']['server.host'];
 		$port = $this->config['TCPserver']['server.port'];
 		$clientParam             = ClientParams::instance();
@@ -62,6 +61,7 @@ class Client {
 		}
 
 		$clientParam->method     = $params[0];
+		unset($params[0]);
 		$clientParam->callParams = $params;
 		$clientParam->isResponse = $isResponse;
 		$clientParam->request_id = getRequestId();
@@ -146,7 +146,7 @@ class Client {
 		$request_id = getRequestId();
 		if($request_id){
 			$data = [];
-			$data['response']= HttpServer::$response;
+			$data['response']= CoroutineContent::get('response');
 			$data['request_id'] = $request_id;
 			Response::$responseList[$request_id] = $data;
 		}

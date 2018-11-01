@@ -18,7 +18,7 @@ class CoroutineContent
 
 	static function get($key)
 	{
-		$cid = Coroutine::getuid();
+		$cid = self::getCid();
 		if ($cid < 0)
 		{
 			return null;
@@ -31,7 +31,7 @@ class CoroutineContent
 
 	static function put($key, $item)
 	{
-		$cid = Coroutine::getuid();
+		$cid = self::getCid();
 		if ($cid > 0)
 		{
 			self::$pool[$cid][$key] = $item;
@@ -41,7 +41,7 @@ class CoroutineContent
 
 	static function delete($key = null)
 	{
-		$cid = Coroutine::getuid();
+		$cid = self::getCid();
 		if ($cid > 0)
 		{
 			if($key){
@@ -50,5 +50,15 @@ class CoroutineContent
 				unset(self::$pool[$cid]);
 			}
 		}
+	}
+
+	static function getCid()
+	{
+		if(DFS){
+			$cid = Coroutine::getuid();
+		}else{
+			$cid = getRequestId();
+		}
+		return $cid;
 	}
 }

@@ -8,6 +8,8 @@
 
 namespace server\Exception;
 
+use server\Log\Log;
+
 
 /**
  * 系统异常
@@ -24,7 +26,7 @@ class GrossErrorException extends \Exception{
 	 */
 	public function __construct($code,$msg='') {
 		$msg || $msg = ErrorHandler::getErrMsg( $code );
-		//Log::error( '严重错误:msg=' . $msg . ' ; code=' . $code );
+		Log::error( '严重错误:msg=' . $msg . ' ; code=' . $code );
 		parent::__construct( $msg, $code );
 
 	}

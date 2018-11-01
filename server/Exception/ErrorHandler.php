@@ -175,6 +175,7 @@ class ErrorHandler {
 	const SIGN_LENGTH_ERROR = 30225;
 	//服务提供
 	const SERVERS_REQUEST_FAIL = 30230;
+	const SERVERS_DFS_FAIL     = 30231;
 
 	//OSS
 	const OSS_ERROR_UPLOAD_FILE = 40000;
@@ -360,7 +361,7 @@ class ErrorHandler {
 
 			//服务
 			self::SERVERS_REQUEST_FAIL           => '服务请求失败',
-
+			self::SERVERS_DFS_FAIL               => '单机情况下不支持TCP服务请求',
 
 			//微信
 			self::WX_PARAM_ERROR => '微信参数错误',
