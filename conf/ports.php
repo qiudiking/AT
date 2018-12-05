@@ -5,7 +5,7 @@
  * Date: 16-7-14
  * Time: 下午1:58
  */
-use server\server\CoreBase\PortManager;
+use AtServer\CoreBase\PortManager;
 
 
 $config['ports']['TCP'] = [

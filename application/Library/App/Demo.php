@@ -6,10 +6,10 @@
  * Time: 14:52
  */
 
-namespace App;
+namespace Library\App;
 
 
-use server\Client\ClientServerBase;
+use AtServer\ClientServerBase;
 
 class Demo extends ClientServerBase {
 	public function init() {

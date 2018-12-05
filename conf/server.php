@@ -29,7 +29,7 @@
 		    'daemonize'=>1,
 	    ],
 	    'HTTP'=>[
-			'worker_num'=>1,
+			'worker_num'=>4,
 		    'task_worker_num'=>2,
 		    'max_request'=>30000,
 		    'daemonize'=>1,
@@ -40,6 +40,19 @@
 		    'process_name'=>'AT_HTTP',
 			'document_root' => AT.'/public',
 			'enable_static_handler' => true,
+	    ],
+	    'WS'=>[
+		    'worker_num'=>4,
+		    'task_worker_num'=>2,
+		    'max_request'=>30000,
+		    'daemonize'=>1,
+		    'log_file'=>'/var/log/swoole.log',
+		    'user'=>'root',
+		    'group'=>'root',
+		    'package_max_length'=>4194304,
+		    'process_name'=>'AT_WS',
+		    'document_root' => AT.'/public',
+		    'enable_static_handler' => true,
 	    ]
     ]
  ];

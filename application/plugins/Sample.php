@@ -9,12 +9,12 @@ class SamplePlugin extends Yaf\Plugin_Abstract {
 
 	public function routerStartup(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {
 		//在路由之前触发
-		\server\YafRoute\myRoute::instance()->route($request);
+		AtServer\myRoute::instance()->route($request);
 	}
 
 	public function routerShutdown(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {
 		//路由结束之后触发
-		\server\Verify\BaseBootstrap::controllerVerify($request);
+		AtServer\BaseBootstrap::controllerVerify($request);
 	}
 
 	public function dispatchLoopStartup(Yaf\Request_Abstract $request, Yaf\Response_Abstract $response) {

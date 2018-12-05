@@ -1,5 +1,5 @@
 <?php
-use server\YafController\YafController;
+use AtServer\YafController;
 /**
  * @name IndexController
  * @author desktop-m38aanj\htpc
@@ -8,8 +8,12 @@ use server\YafController\YafController;
  */
 class IndexController extends YafController
 {
-	public function indexAction()
+	/**
+	 * @method GET
+	 */
+	public function IndexAction()
 	{
+		setCookieInfo('session_id',getRandChar(16));
 		$this->display('index');
 	}
 
@@ -21,5 +25,15 @@ class IndexController extends YafController
 	public function demo2Action()
 	{
 		echo '成功跳转';
+	}
+
+	public function ceAction()
+	{
+
+	}
+
+	public function yaoyiyaoAction()
+	{
+		$this->display('yaoyiyao');
 	}
 }

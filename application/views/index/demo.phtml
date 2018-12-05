@@ -20,8 +20,6 @@
     var timer = window.setInterval(function () {
         var rand = parseInt(10000*Math.random());
         page.apiGet('/Index/Index/index',{rand:rand},function ( res ) {
-            console.log( res );
-            console.log( rand );
             if ( Number( res ) === rand ) {
                 console.log( '等于' );
             } else {

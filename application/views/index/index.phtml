@@ -1,12 +1,67 @@
-<!DOCTYPE html>
+<!DOCTYPE HTML>
 <html>
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8">
+    <title>菜鸟教程(runoob.com)</title>
 </head>
 <body>
-    <h1 style="margin: 0 auto;">hello world</h1>
+
+<div id="sse">
+    <a href="javascript:WebSocketTest()">运行 WebSocket</a>
+    <a href="http://www.baidu.com">百度一下</a>
+</div>
+
 </body>
-<script>
-    console.log(location);
+<script type="text/javascript">
+    function WebSocketTest()
+    {
+        if ("WebSocket" in window)
+        {
+            alert("您的浏览器支持 WebSocket!");
+
+            // 打开一个 web socket
+            var ws = new WebSocket("ws://111.230.245.244:9093/Index/Index?hello=1");
+            // var ws = new WebSocket("ws://at.blogci.cn/index/index?hello=1");
+            console.log( ws );
+            ws.onopen = function(res)
+            {
+                alert('连接成功');
+                console.log( res );
+                // Web Socket 已连接上，使用 send() 方法发送数据
+                var data = {};
+                data.data = '发送数据.......';
+                data.message_router = 'Message/Index';
+                ws.send(JSON.stringify(data));
+                //alert("数据发送中...");
+
+            };
+
+            ws.onmessage = function (evt)
+            {
+                var received_msg = evt.data;
+                alert("数据已接收...");
+                console.log(JSON.parse(evt.data));
+            };
+
+            ws.onclose = function(res)
+            {
+                console.log( res );
+                // 关闭 websocket
+                alert("连接已关闭...");
+            };
+
+            ws.onerror = function ( res ) {
+                console.log(res);
+                alert('错误....');
+            }
+        }
+
+        else
+        {
+            // 浏览器不支持 WebSocket
+            alert("您的浏览器不支持 WebSocket!");
+        }
+    }
 </script>
+
 </html>

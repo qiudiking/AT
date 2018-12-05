@@ -1,12 +1,29 @@
 {
     "require": {
         "symfony/console": "@stable",
-        "hassankhan/config": "*",
-        "swlib/saber" :"1.0.0"
+        "hassankhan/config": "1.1.0",
+        "swlib/saber" :"1.0.0",
+        "at_server/cache":"1.1",
+        "at_server/client":"1.1",
+        "at_server/console":"1.1",
+        "at_server/coroutineclient":"1.0",
+        "at_server/db":"1.2",
+        "at_server/docparse":"1.0",
+        "at_server/exception":"1.0",
+        "at_server/generator":"1.1",
+        "at_server/log":"1.0",
+        "at_server/result":"1.1",
+        "at_server/server":"1.5",
+        "at_server/sign":"1.0",
+        "at_server/verify":"1.2",
+        "at_server/yafcontroller":"1.0",
+        "at_server/yafplugins":"1.0",
+        "at_server/yafroute":"1.0"
     },
     "autoload": {
         "psr-4":{
-            "Mycmd\\": "src/Mycmd"
+            "Library\\": "application/Library"
         }
+
     }
 }
